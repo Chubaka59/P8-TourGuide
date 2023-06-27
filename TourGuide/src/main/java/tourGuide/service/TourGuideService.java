@@ -2,13 +2,7 @@ package tourGuide.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -91,14 +85,21 @@ public class TourGuideService {
 	}
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
+		Map<Attraction, Double> attractionMap = new HashMap<>();
 		for(Attraction attraction : gpsUtil.getAttractions()) {
-			if(rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
+			attractionMap.put(attraction, rewardsService.getDistance(attraction, visitedLocation.location));
 		}
-		
-		return nearbyAttractions;
+
+		HashMap<Attraction, Double> sortedAttractionMap = attractionMap.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue())
+				.limit(5)
+				.collect(Collectors.toMap(
+						Map.Entry::getKey,
+						Map.Entry::getValue,
+						(oldValue, newValue) -> oldValue, LinkedHashMap::new
+				));
+
+		return new ArrayList<>(sortedAttractionMap.keySet());
 	}
 	
 	private void addShutDownHook() {
