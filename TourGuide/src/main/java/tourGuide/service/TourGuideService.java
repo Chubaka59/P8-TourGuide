@@ -84,21 +84,17 @@ public class TourGuideService {
 	}
 
 	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		Map<Attraction, Double> attractionMap = new HashMap<>();
-		for(Attraction attraction : gpsUtil.getAttractions()) {
-			attractionMap.put(attraction, rewardsService.getDistance(attraction, visitedLocation.location));
-		}
 
-		HashMap<Attraction, Double> sortedAttractionMap = attractionMap.entrySet().stream()
-				.sorted(Map.Entry.comparingByValue())
+		List<Attraction> attractions = gpsUtil.getAttractions();
+		Location location = visitedLocation.location;
+
+		return attractions
+				.stream()
+				.map(a -> new AttractionDistance(a, location))
+				.sorted(Comparator.comparing(o -> o.distance))
 				.limit(5)
-				.collect(Collectors.toMap(
-						Map.Entry::getKey,
-						Map.Entry::getValue,
-						(oldValue, newValue) -> oldValue, LinkedHashMap::new
-				));
-
-		return new ArrayList<>(sortedAttractionMap.keySet());
+				.map(a -> a.attraction)
+				.collect(Collectors.toList());
 	}
 	
 	private void addShutDownHook() {
