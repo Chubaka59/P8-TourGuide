@@ -79,7 +79,12 @@ public class TourGuideService {
 	public VisitedLocation trackUserLocation(User user) {
 		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
 		user.addToVisitedLocations(visitedLocation);
-		rewardsService.calculateRewards(user);
+		try {
+			rewardsService.calculateRewards(user);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+
 		return visitedLocation;
 	}
 
