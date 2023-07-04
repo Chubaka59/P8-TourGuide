@@ -9,7 +9,11 @@ import rewardCentral.RewardCentral;
 import tourGuide.user.User;
 import tourGuide.user.UserReward;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class RewardsService {
@@ -38,6 +42,8 @@ public class RewardsService {
 	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
 		List<Attraction> attractions = gpsUtil.getAttractions();
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		List<Callable<Void>> callableList = new ArrayList<>();
 
 		attractions
 				.stream()
@@ -45,8 +51,13 @@ public class RewardsService {
 				.forEach(attraction -> userLocations
 						.stream()
 						.filter(visitedLocation -> nearAttraction(visitedLocation, attraction))
-						.forEach(visitedLocation -> user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user))))
+						.forEach(visitedLocation -> callableList.add(() -> user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)))))
 		);
+		try {
+			executor.invokeAll(callableList);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
