@@ -11,9 +11,7 @@ import tourGuide.user.UserReward;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 @Service
 public class RewardsService {
@@ -42,8 +40,8 @@ public class RewardsService {
 	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = user.getVisitedLocations();
 		List<Attraction> attractions = gpsUtil.getAttractions();
-		ExecutorService executor = Executors.newFixedThreadPool(10);
-		List<Callable<Void>> callableList = new ArrayList<>();
+		ExecutorService executor = Executors.newCachedThreadPool();
+		List<Callable<UserReward>> callableList = new ArrayList<>();
 
 		attractions
 				.stream()
@@ -51,12 +49,18 @@ public class RewardsService {
 				.forEach(attraction -> userLocations
 						.stream()
 						.filter(visitedLocation -> nearAttraction(visitedLocation, attraction))
-						.forEach(visitedLocation -> callableList.add(() -> user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)))))
+						.forEach(visitedLocation -> callableList.add(() -> new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user))))
 		);
+
 		try {
-			executor.invokeAll(callableList);
-		} catch (InterruptedException e) {
+			List<Future<UserReward>> rewardFutures = executor.invokeAll(callableList);
+			for (Future<UserReward> future: rewardFutures){
+				user.addUserReward(future.get());
+			}
+		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException(e);
+		} finally {
+			executor.shutdown();
 		}
 	}
 

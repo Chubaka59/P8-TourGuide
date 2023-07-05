@@ -17,6 +17,9 @@ import tripPricer.TripPricer;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,6 +31,8 @@ public class TourGuideService {
 	private final TripPricer tripPricer = new TripPricer();
 	public final Tracker tracker;
 	boolean testMode = true;
+
+	private	ExecutorService executor = Executors.newFixedThreadPool(100);
 	
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
@@ -59,7 +64,7 @@ public class TourGuideService {
 	}
 	
 	public List<User> getAllUsers() {
-		return internalUserMap.values().stream().collect(Collectors.toList());
+		return new ArrayList<>(internalUserMap.values());
 	}
 	
 	public void addUser(User user) {
@@ -69,7 +74,7 @@ public class TourGuideService {
 	}
 	
 	public List<Provider> getTripDeals(User user) {
-		int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
+		int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
 		List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(), 
 				user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
 		user.setTripDeals(providers);
@@ -78,8 +83,12 @@ public class TourGuideService {
 	
 	public VisitedLocation trackUserLocation(User user) {
 		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-		user.addToVisitedLocations(visitedLocation);
-		rewardsService.calculateRewards(user);
+
+		executor.submit(() -> {
+			user.addToVisitedLocations(visitedLocation);
+			rewardsService.calculateRewards(user);
+		});
+
 		return visitedLocation;
 	}
 
@@ -147,6 +156,21 @@ public class TourGuideService {
 	private Date getRandomTime() {
 		LocalDateTime localDateTime = LocalDateTime.now().minusDays(new Random().nextInt(30));
 	    return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+	}
+
+	public void stopTracking() {
+		tracker.stopTracking();
+		executor.shutdown();
+
+		while (true){
+			try {
+				if (executor.awaitTermination(1, TimeUnit.MINUTES)) break;
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+
 	}
 
 
