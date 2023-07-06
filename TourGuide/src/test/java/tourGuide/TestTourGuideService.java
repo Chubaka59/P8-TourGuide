@@ -1,23 +1,21 @@
 package tourGuide;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
+import org.junit.Test;
 import rewardCentral.RewardCentral;
+import tourGuide.dto.nearbyattractions.NearByAttractionsDTO;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.service.RewardsService;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tripPricer.Provider;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestTourGuideService {
 
@@ -100,13 +98,12 @@ public class TestTourGuideService {
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 		
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-		
-		List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
+
+		NearByAttractionsDTO attractions = tourGuideService.getNearByAttractions(user);
 		
 		tourGuideService.tracker.stopTracking();
 
-		assertEquals(5, attractions.size());
+		assertEquals(5, attractions.getAttractionDTOList().size());
 	}
 
 	@Test

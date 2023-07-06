@@ -7,6 +7,8 @@ import gpsUtil.location.VisitedLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tourGuide.dto.nearbyattractions.AttractionDTO;
+import tourGuide.dto.nearbyattractions.NearByAttractionsDTO;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
@@ -92,18 +94,30 @@ public class TourGuideService {
 		return visitedLocation;
 	}
 
-	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
+	public NearByAttractionsDTO getNearByAttractions(User user) {
 
 		List<Attraction> attractions = gpsUtil.getAttractions();
-		Location location = visitedLocation.location;
+		Location location = getUserLocation(user).location;
 
-		return attractions
+		List<Attraction> closestAttractions = attractions
 				.stream()
 				.map(a -> new AttractionDistance(a, location))
 				.sorted(Comparator.comparing(o -> o.distance))
 				.limit(5)
 				.map(a -> a.attraction)
 				.collect(Collectors.toList());
+
+		return new NearByAttractionsDTO(getAttractionDTO(closestAttractions, user), location);
+	}
+
+	private List<AttractionDTO> getAttractionDTO(List<Attraction> attractionList, User user){
+		List<AttractionDTO> attractionDTOList = new ArrayList<>();
+		for ( Attraction attraction : attractionList ) {
+			double distance = rewardsService.getDistance(attraction, user.getLastVisitedLocation().location);
+			int rewardPoints = rewardsService.getRewardPoints(attraction, user);
+			attractionDTOList.add(new AttractionDTO(attraction, distance, rewardPoints));
+		}
+		return attractionDTOList;
 	}
 	
 	private void addShutDownHook() {

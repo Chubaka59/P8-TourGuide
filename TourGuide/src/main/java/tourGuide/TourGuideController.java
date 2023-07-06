@@ -1,18 +1,16 @@
 package tourGuide;
 
-import java.util.List;
-
+import com.jsoniter.output.JsonStream;
+import gpsUtil.location.VisitedLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.jsoniter.output.JsonStream;
-
-import gpsUtil.location.VisitedLocation;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tripPricer.Provider;
+
+import java.util.List;
 
 @RestController
 public class TourGuideController {
@@ -31,7 +29,7 @@ public class TourGuideController {
 		return JsonStream.serialize(visitedLocation.location);
     }
     
-    //  TODO: Change this method to no longer return a List of Attractions.
+    // TODO: Change this method to no longer return a List of Attractions.
  	//  Instead: Get the closest five tourist attractions to the user - no matter how far away they are.
  	//  Return a new JSON object that contains:
     	// Name of Tourist attraction, 
@@ -42,8 +40,7 @@ public class TourGuideController {
         //    Note: Attraction reward points can be gathered from RewardsCentral
     @RequestMapping("/getNearbyAttractions") 
     public String getNearbyAttractions(@RequestParam String userName) {
-    	VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
-    	return JsonStream.serialize(tourGuideService.getNearByAttractions(visitedLocation));
+    	return JsonStream.serialize(tourGuideService.getNearByAttractions(getUser(userName)));
     }
     
     @RequestMapping("/getRewards") 
