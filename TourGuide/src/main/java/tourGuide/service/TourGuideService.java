@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.nearbyattractions.AttractionDTO;
 import tourGuide.dto.nearbyattractions.NearByAttractionsDTO;
+import tourGuide.dto.nearbyattractions.UserPreferencesDTO;
 import tourGuide.dto.nearbyattractions.UsersLocationDTO;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
@@ -92,6 +93,11 @@ public class TourGuideService {
 				user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
 		user.setTripDeals(providers);
 		return providers;
+	}
+
+	public User setUserPreferences(UserPreferencesDTO userPreferencesDTO, User user) {
+		user.getUserPreferences().update(userPreferencesDTO);
+		return user;
 	}
 	
 	public VisitedLocation trackUserLocation(User user) {
