@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.nearbyattractions.AttractionDTO;
 import tourGuide.dto.nearbyattractions.NearByAttractionsDTO;
+import tourGuide.dto.nearbyattractions.UsersLocationDTO;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
@@ -60,6 +61,16 @@ public class TourGuideService {
 			trackUserLocation(user);
 		return visitedLocation;
 	}
+
+	public List<UsersLocationDTO> getAllUsersLocation(){
+		List<UsersLocationDTO> usersLocationDTOList = new ArrayList<>();
+		List<User> userList = getAllUsers();
+		for (User user : userList ) {
+			VisitedLocation location = getUserLocation(user);
+			usersLocationDTOList.add(new UsersLocationDTO(location, user));
+		}
+		return usersLocationDTOList;
+	}
 	
 	public User getUser(String userName) {
 		return internalUserMap.get(userName);
@@ -76,9 +87,9 @@ public class TourGuideService {
 	}
 	
 	public List<Provider> getTripDeals(User user) {
-		int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
+		int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
 		List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(), 
-				user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
+				user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
 		user.setTripDeals(providers);
 		return providers;
 	}

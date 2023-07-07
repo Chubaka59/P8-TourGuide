@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tourGuide.dto.nearbyattractions.UsersLocationDTO;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tripPricer.Provider;
@@ -59,8 +60,10 @@ public class TourGuideController {
     	//        "019b04a9-067a-4c76-8817-ee75088c3822": {"longitude":-48.188821,"latitude":74.84371} 
     	//        ...
     	//     }
-    	
-    	return JsonStream.serialize("");
+
+        List<UsersLocationDTO> usersLocationDTOList = tourGuideService.getAllUsersLocation();
+
+    	return JsonStream.serialize(usersLocationDTOList);
     }
     
     @RequestMapping("/getTripDeals")
@@ -72,6 +75,4 @@ public class TourGuideController {
     private User getUser(String userName) {
     	return tourGuideService.getUser(userName);
     }
-   
-
 }
