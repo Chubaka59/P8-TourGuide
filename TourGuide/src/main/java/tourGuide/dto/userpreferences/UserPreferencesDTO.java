@@ -1,4 +1,4 @@
-package tourGuide.dto.nearbyattractions;
+package tourGuide.dto.userpreferences;
 
 public class UserPreferencesDTO {
     int tripDuration;

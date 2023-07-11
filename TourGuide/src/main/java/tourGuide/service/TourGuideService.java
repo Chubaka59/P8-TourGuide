@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tourGuide.dto.nearbyattractions.AttractionDTO;
 import tourGuide.dto.nearbyattractions.NearByAttractionsDTO;
-import tourGuide.dto.nearbyattractions.UserPreferencesDTO;
-import tourGuide.dto.nearbyattractions.UsersLocationDTO;
+import tourGuide.dto.userpreferences.UserPreferencesDTO;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.tracker.Tracker;
 import tourGuide.user.User;
@@ -57,20 +56,16 @@ public class TourGuideService {
 	}
 	
 	public VisitedLocation getUserLocation(User user) {
-		VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ?
+		return (user.getVisitedLocations().size() > 0) ?
 			user.getLastVisitedLocation() :
 			trackUserLocation(user);
-		return visitedLocation;
 	}
 
-	public List<UsersLocationDTO> getAllUsersLocation(){
-		List<UsersLocationDTO> usersLocationDTOList = new ArrayList<>();
-		List<User> userList = getAllUsers();
-		for (User user : userList ) {
-			VisitedLocation location = getUserLocation(user);
-			usersLocationDTOList.add(new UsersLocationDTO(location, user));
-		}
-		return usersLocationDTOList;
+	public Map<UUID, Location> getAllUsersLocation(){
+
+		return getAllUsers()
+				.stream()
+				.collect(Collectors.toMap(User::getUserId, u -> this.getUserLocation(u).location));
 	}
 	
 	public User getUser(String userName) {

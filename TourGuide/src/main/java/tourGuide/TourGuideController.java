@@ -1,20 +1,23 @@
 package tourGuide;
 
-import com.jsoniter.output.JsonStream;
+import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import tourGuide.dto.nearbyattractions.UserPreferencesDTO;
-import tourGuide.dto.nearbyattractions.UsersLocationDTO;
+import tourGuide.dto.nearbyattractions.NearByAttractionsDTO;
+import tourGuide.dto.userpreferences.UserPreferencesDTO;
 import tourGuide.service.TourGuideService;
 import tourGuide.user.User;
 import tourGuide.user.UserPreferences;
+import tourGuide.user.UserReward;
 import tripPricer.Provider;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 public class TourGuideController {
@@ -28,51 +31,28 @@ public class TourGuideController {
     }
     
     @RequestMapping("/getLocation") 
-    public String getLocation(@RequestParam String userName) {
-    	VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
-		return JsonStream.serialize(visitedLocation.location);
+    public VisitedLocation getLocation(@RequestParam String userName) {
+        return tourGuideService.getUserLocation(getUser(userName));
     }
-    
-    // TODO: Change this method to no longer return a List of Attractions.
- 	//  Instead: Get the closest five tourist attractions to the user - no matter how far away they are.
- 	//  Return a new JSON object that contains:
-    	// Name of Tourist attraction, 
-        // Tourist attractions lat/long, 
-        // The user's location lat/long, 
-        // The distance in miles between the user's location and each of the attractions.
-        // The reward points for visiting each Attraction.
-        //    Note: Attraction reward points can be gathered from RewardsCentral
+
     @RequestMapping("/getNearbyAttractions") 
-    public String getNearbyAttractions(@RequestParam String userName) {
-    	return JsonStream.serialize(tourGuideService.getNearByAttractions(getUser(userName)));
+    public NearByAttractionsDTO getNearbyAttractions(@RequestParam String userName) {
+    	return tourGuideService.getNearByAttractions(getUser(userName));
     }
     
     @RequestMapping("/getRewards") 
-    public String getRewards(@RequestParam String userName) {
-    	return JsonStream.serialize(tourGuideService.getUserRewards(getUser(userName)));
+    public List<UserReward> getRewards(@RequestParam String userName) {
+    	return tourGuideService.getUserRewards(getUser(userName));
     }
-    
+
     @RequestMapping("/getAllCurrentLocations")
-    public String getAllCurrentLocations() {
-    	// TODO: Get a list of every user's most recent location as JSON
-    	//- Note: does not use gpsUtil to query for their current location, 
-    	//        but rather gathers the user's current location from their stored location history.
-    	//
-    	// Return object should be the just a JSON mapping of userId to Locations similar to:
-    	//     {
-    	//        "019b04a9-067a-4c76-8817-ee75088c3822": {"longitude":-48.188821,"latitude":74.84371} 
-    	//        ...
-    	//     }
-
-        List<UsersLocationDTO> usersLocationDTOList = tourGuideService.getAllUsersLocation();
-
-    	return JsonStream.serialize(usersLocationDTOList);
+    public Map<UUID, Location> getAllCurrentLocations() {
+        return tourGuideService.getAllUsersLocation();
     }
     
     @RequestMapping("/getTripDeals")
-    public String getTripDeals(@RequestParam String userName) {
-    	List<Provider> providers = tourGuideService.getTripDeals(getUser(userName));
-    	return JsonStream.serialize(providers);
+    public List<Provider> getTripDeals(@RequestParam String userName) {
+        return tourGuideService.getTripDeals(getUser(userName));
     }
     
     private User getUser(String userName) {
@@ -82,11 +62,7 @@ public class TourGuideController {
     @PostMapping("/setUserPreferences")
     public ResponseEntity<UserPreferences> updateUserPreferences(@RequestBody @Validated UserPreferencesDTO userPreferencesDTO ,
                                                                  @RequestParam String userName ) {
-        try {
-            tourGuideService.setUserPreferences(userPreferencesDTO, getUser(userName));
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        tourGuideService.setUserPreferences(userPreferencesDTO, getUser(userName));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

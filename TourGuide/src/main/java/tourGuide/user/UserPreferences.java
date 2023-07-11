@@ -1,7 +1,7 @@
 package tourGuide.user;
 
 import org.javamoney.moneta.Money;
-import tourGuide.dto.nearbyattractions.UserPreferencesDTO;
+import tourGuide.dto.userpreferences.UserPreferencesDTO;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
