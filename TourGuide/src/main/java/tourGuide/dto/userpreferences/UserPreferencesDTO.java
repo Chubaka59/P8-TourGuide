@@ -16,4 +16,7 @@ public class UserPreferencesDTO {
     public int getNumberOfChildren() {
         return numberOfChildren;
     }
+
+    public UserPreferencesDTO(){
+    }
 }

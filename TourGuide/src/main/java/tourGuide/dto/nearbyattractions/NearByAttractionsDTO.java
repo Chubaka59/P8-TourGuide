@@ -14,4 +14,7 @@ public class NearByAttractionsDTO {
         this.attractionDTOList = attractionDTOList;
         this.userLocation = userLocation;
     }
+
+    public NearByAttractionsDTO(){
+    }
 }
