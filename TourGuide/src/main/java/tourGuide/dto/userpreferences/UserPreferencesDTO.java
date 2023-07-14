@@ -19,4 +19,10 @@ public class UserPreferencesDTO {
 
     public UserPreferencesDTO(){
     }
+
+    public UserPreferencesDTO(int tripDuration, int numberOfAdults, int numberOfChildren) {
+        this.tripDuration = tripDuration;
+        this.numberOfAdults = numberOfAdults;
+        this.numberOfChildren = numberOfChildren;
+    }
 }
