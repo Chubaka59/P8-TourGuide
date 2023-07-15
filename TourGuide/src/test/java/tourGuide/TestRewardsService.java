@@ -60,5 +60,5 @@ public class TestRewardsService {
 
 		assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
 	}
-	
+
 }

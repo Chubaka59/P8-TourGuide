@@ -18,10 +18,6 @@ public class UserReward {
 		this.visitedLocation = visitedLocation;
 		this.attraction = attraction;
 	}
-
-	public void setRewardPoints(int rewardPoints) {
-		this.rewardPoints = rewardPoints;
-	}
 	
 	public int getRewardPoints() {
 		return rewardPoints;
