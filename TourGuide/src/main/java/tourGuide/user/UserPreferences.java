@@ -15,7 +15,7 @@ public class UserPreferences {
 	private Money highPricePoint = Money.of(Integer.MAX_VALUE, currency);
 	private int tripDuration = 1;
 	private int ticketQuantity = 1;
-	private int numberOfAdults;
+	private int numberOfAdults = 1;
 	private int numberOfChildren = 0;
 	
 	public UserPreferences() {
