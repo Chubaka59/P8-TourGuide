@@ -5,8 +5,12 @@ import gpsUtil.location.Location;
 import java.util.List;
 
 public class NearByAttractionsDTO {
-    List<AttractionDTO> attractionDTOList;
     Location userLocation;
+    List<AttractionDTO> attractionDTOList;
+
+    public Location getUserLocation() {
+        return userLocation;
+    }
 
     public List<AttractionDTO> getAttractionDTOList() { return attractionDTOList; }
 
